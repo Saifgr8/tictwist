@@ -1,3 +1,4 @@
+"use client";
 export const gameBot4x4 = (
   board,
   botSymbol,

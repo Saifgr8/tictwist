@@ -1,3 +1,4 @@
+"use client";
 export const gameBot5x5 = (
   board,
   botSymbol,
@@ -487,23 +488,33 @@ export const gameBot5x5 = (
     for (let i = 0; i < board.length; i++) {
       mainDiagonal.push(board[i][board.length - 1 - i]);
     }
-  
+
     // Top small diagonal: 4 cells ([0][3], [1][2], [2][1], [3][0])
     const topSmallDiag = [board[0][3], board[1][2], board[2][1], board[3][0]];
-  
+
     // Bottom small diagonal: 4 cells ([1][4], [2][3], [3][2], [4][1])
-    const bottomSmallDiag = [board[1][4], board[2][3], board[3][2], board[4][1]];
-  
+    const bottomSmallDiag = [
+      board[1][4],
+      board[2][3],
+      board[3][2],
+      board[4][1],
+    ];
+
     // Tiny top diagonal: 3 cells ([0][2], [1][1], [2][0])
     const tinyTopDiag = [board[0][2], board[1][1], board[2][0]];
-  
+
     // Tiny bottom diagonal: 3 cells ([2][4], [3][3], [4][2])
     const tinyBottomDiag = [board[2][4], board[3][3], board[4][2]];
-  
+
     // Helper to check diagonal points
-    const checkDiagonalPoints = (diagonal, flagName, rowOffsets, colOffsets) => {
+    const checkDiagonalPoints = (
+      diagonal,
+      flagName,
+      rowOffsets,
+      colOffsets
+    ) => {
       if (!flags[flagName]) return null;
-  
+
       for (let i = 0; i < diagonal.length - 2; i++) {
         // Empty cell at the end
         if (
@@ -517,7 +528,7 @@ export const gameBot5x5 = (
             col: colOffsets[i + 2],
           };
         }
-  
+
         // Empty cell in the middle
         if (
           diagonal[i] === symbol &&
@@ -530,7 +541,7 @@ export const gameBot5x5 = (
             col: colOffsets[i + 1],
           };
         }
-  
+
         // Empty cell at the start
         if (
           diagonal[i] === "." &&
@@ -546,7 +557,7 @@ export const gameBot5x5 = (
       }
       return null;
     };
-  
+
     // Main diagonal
     const mainDiagMove = checkDiagonalPoints(
       mainDiagonal,
@@ -555,7 +566,7 @@ export const gameBot5x5 = (
       [4, 3, 2, 1, 0]
     );
     if (mainDiagMove) return mainDiagMove;
-  
+
     // Top small diagonal
     const topSmallDiagMove = checkDiagonalPoints(
       topSmallDiag,
@@ -564,7 +575,7 @@ export const gameBot5x5 = (
       [3, 2, 1, 0]
     );
     if (topSmallDiagMove) return topSmallDiagMove;
-  
+
     // Bottom small diagonal
     const bottomSmallDiagMove = checkDiagonalPoints(
       bottomSmallDiag,
@@ -573,7 +584,7 @@ export const gameBot5x5 = (
       [4, 3, 2, 1]
     );
     if (bottomSmallDiagMove) return bottomSmallDiagMove;
-  
+
     // Tiny top diagonal
     const tinyTopDiagMove = checkDiagonalPoints(
       tinyTopDiag,
@@ -582,7 +593,7 @@ export const gameBot5x5 = (
       [2, 1, 0]
     );
     if (tinyTopDiagMove) return tinyTopDiagMove;
-  
+
     // Tiny bottom diagonal
     const tinyBottomDiagMove = checkDiagonalPoints(
       tinyBottomDiag,
@@ -591,11 +602,10 @@ export const gameBot5x5 = (
       [4, 3, 2]
     );
     if (tinyBottomDiagMove) return tinyBottomDiagMove;
-  
+
     // No points found
     return null;
   };
-  
 
   //winning move
   let move = findWinRow(board, botSymbol);

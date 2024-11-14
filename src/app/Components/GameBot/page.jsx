@@ -1,3 +1,4 @@
+'use client'
 export const gameLogicBotMove = (board, botSymbol, playerSymbol) => {
   const findMove = (symbol) => {
     //check row
