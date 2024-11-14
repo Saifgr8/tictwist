@@ -20,7 +20,7 @@ const Game4x4UI = ({
     <div className="min-h-screen flex flex-col justify-between bg-green-200">
       {/* Top Section */}
       <div className="flex flex-col sm:flex-row justify-center items-center gap-4 p-4">
-        <div className="w-full sm:w-1/3 h-28 lg:h-32 bg-red-300 flex flex-col justify-center items-center text-lg sm:text-2xl p-4 shadow-xl rounded-lg">
+        <div className="w-fit sm:w-1/3 h-28 lg:h-32 bg-red-300 flex flex-col justify-center items-center text-lg sm:text-2xl p-4 shadow-xl rounded-lg">
           {winner ? (
             <div className="font-bold flex text-2xl items-center text-center ">
               {winner} has won the game!
@@ -85,7 +85,10 @@ const Game4x4UI = ({
         </div>
 
         {/* Game Board */}
-        <div className="w-full sm:w-[450px] bg-red-400 p-4 flex flex-wrap justify-center items-center shadow-inner shadow-green-100 rounded-lg">
+        <div
+          className="w-full max-w-[450px] sm:max-w-[400px] bg-red-400 p-4 flex flex-wrap justify-center items-center shadow-inner shadow-green-100 rounded-lg"
+          style={{ aspectRatio: "1" }} // Maintain square aspect ratio
+        >
           {grid.map((rowArray, rowIndex) =>
             rowArray.map((cell, colIndex) => (
               <div
@@ -97,7 +100,7 @@ const Game4x4UI = ({
                   highlightGrid[rowIndex][colIndex]
                     ? "shadow-inner shadow-green-400 rounded-2xl animate-bounce bg-blue-400"
                     : "bg-white"
-                }  h-16 w-16 sm:h-20 transform rounded-sm transition-transform duration-200 hover:scale-125 sm:w-20 m-1 sm:m-2 text-4xl sm:text-6xl hover:bg-green-100 text-black flex items-center justify-center hover:rounded-xl hover:shadow-xl`}
+                } h-[calc(100%/4-0.5rem)] w-[calc(100%/4-0.5rem)] transform rounded-sm transition-transform duration-200 hover:scale-125 m-1 text-4xl hover:bg-green-100 text-black flex items-center justify-center hover:rounded-xl hover:shadow-xl`}
               >
                 {cell}
               </div>
