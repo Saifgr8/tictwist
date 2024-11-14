@@ -38,7 +38,11 @@ const GameStandardUI = ({
               </span>
             ) : (
               <span>
-                {winner} <span className="italic">has won!</span>
+                {winner === player1 ? (
+                  <span className="italic">You won the game!</span>
+                ) : (
+                  <span className="italic">Ai Bot won the game!</span>
+                )}
               </span>
             )}
           </div>

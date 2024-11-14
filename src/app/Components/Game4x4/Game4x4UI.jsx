@@ -100,7 +100,7 @@ const Game4x4UI = ({
                   highlightGrid[rowIndex][colIndex]
                     ? "shadow-inner shadow-green-400 rounded-2xl animate-bounce bg-blue-400"
                     : "bg-white"
-                } h-[calc(100%/4-0.5rem)] w-[calc(100%/4-0.5rem)] transform rounded-sm transition-transform duration-200 hover:scale-125 m-1 text-4xl hover:bg-green-100 text-black flex items-center justify-center hover:rounded-xl hover:shadow-xl`}
+                } h-[calc(100%/4-0.5rem)] w-[calc(100%/4-0.5rem)] transform rounded-sm transition-transform duration-200 hover:scale-125 m-1 text-5xl hover:bg-green-100 text-black flex items-center justify-center hover:rounded-xl hover:shadow-xl`}
               >
                 {cell}
               </div>

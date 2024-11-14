@@ -109,8 +109,7 @@ const GameLogic = () => {
   };
 
   const handleMove = (index) => {
-    if (!player1) {
-      window.alert("please pick your letter first");
+    if (currPlayer !== player1) {
       return;
     }
 
