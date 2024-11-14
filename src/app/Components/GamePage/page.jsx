@@ -15,7 +15,7 @@ const LandingPage = ({ onStartGame }) => {
 
       {/* Twisted Features */}
       <div className="bg-white bg-opacity-20 rounded-lg p-6 shadow-lg max-w-lg text-center">
-        <h2 className="text-3xl font-bold mb-4">What's the Twist? 🤔</h2>
+        <h2 className="text-3xl font-bold mb-4">What&apos;s the Twist? 🤔</h2>
         <ul className="list-disc list-inside space-y-2">
           <li>🔥 Special moves to outsmart your opponent.</li>
           <li>⚡ Earn points by forming tricky patterns.</li>
@@ -30,7 +30,7 @@ const LandingPage = ({ onStartGame }) => {
           onClick={onStartGame}
           className="bg-green-500 px-6 py-3 text-2xl rounded-full shadow-lg hover:bg-green-700 hover:scale-110 transform transition-all duration-300 ease-in-out"
         >
-          Let's Twist! 🚀
+          Let&apos;s Twist! 🚀
         </button>
       </div>
 
