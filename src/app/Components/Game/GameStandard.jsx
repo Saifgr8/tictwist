@@ -82,7 +82,7 @@ const GameLogic = () => {
         window.localStorage.setItem("Player2", player2);
         window.localStorage.setItem("CurrPlayer", currPlayer);
         router.push("/Components/Game4x4");
-      }, 1500);
+      }, 500);
     }
   };
   const playAgain = () => {
