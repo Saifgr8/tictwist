@@ -28,6 +28,7 @@ const GameLogic = () => {
     // Check for a winner or draw
     const result = checkBoard(grid);
 
+    console.log(result);
     if (result.winner) {
       setWinner(result.winner); // Update the winner
       console.log("Winner:", result.winner);
@@ -75,11 +76,13 @@ const GameLogic = () => {
     console.log(open, open.length);
     if (open.length === 0 && !winner) {
       setDraw(true);
-      window.alert("starting a 4X4 grid");
-      window.localStorage.setItem("Player1", player1);
-      window.localStorage.setItem("Player2", player2);
-      window.localStorage.setItem("CurrPlayer", currPlayer);
-      router.push("/Components/Game4x4");
+      setTimeout(() => {
+        window.alert("Starting a 4x4 grid");
+        window.localStorage.setItem("Player1", player1);
+        window.localStorage.setItem("Player2", player2);
+        window.localStorage.setItem("CurrPlayer", currPlayer);
+        router.push("/Components/Game4x4");
+      }, 1500);
     }
   };
   const playAgain = () => {

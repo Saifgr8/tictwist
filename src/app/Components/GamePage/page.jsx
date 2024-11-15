@@ -37,7 +37,7 @@ const LandingPage = ({ onStartGame }) => {
       {/* Footer */}
       <footer className="mt-12 text-sm opacity-70 pb-2">
         <p>Created with ❤️ by Saif.</p>
-        <p>5x5 and 6x6 boards will be released soon</p>
+        <p>Player vs Player, 5x5 and 6x6 boards wll be released soon.</p>
       </footer>
     </div>
   );

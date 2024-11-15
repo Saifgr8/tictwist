@@ -15,10 +15,10 @@ const GameStandardUI = ({
   return (
     <div className="h-screen flex flex-col justify-center items-center bg-green-200">
       {/* Player Information and Current Turn */}
-      <div className="w-full flex flex-col justify-center items-center py-6">
+      <div className="w-full flex flex-col justify-center items-center">
         {/* Player Information */}
         <div className="w-full flex gap-2 justify-evenly items-center mb-4">
-          <div className="h-40 w-80 bg-red-300 rounded-lg shadow-xl p-4 flex flex-col justify-evenly items-center">
+          <div className="h-40 w-80 bg-red-300 rounded-lg shadow-xl px-4 flex flex-col justify-evenly items-center">
             <div className="text-2xl">
               You: <span className=" text-3xl">{player1}</span>
             </div>
@@ -27,7 +27,7 @@ const GameStandardUI = ({
             </div>
           </div>
           {/* Current Turn */}
-          <div className="h-40 w-80 bg-blue-300 rounded-lg shadow-xl p-4 flex justify-center text-center items-center text-2xl lg:text-4xl">
+          <div className="h-40 w-80 bg-blue-300 rounded-lg shadow-xl px-4 flex justify-center text-center items-center text-2xl lg:text-4xl">
             {!winner ? (
               <span>
                 {currPlayer === player1 ? (
@@ -48,7 +48,7 @@ const GameStandardUI = ({
           </div>
         </div>
       </div>
-
+      <span className="text-slate-700 lg:text-2xl mb-2 justify-center items-center">Beat the AI Bot or draw to start the 4x4 board!</span>
       {/* Game Board */}
       <div className="flex justify-center items-center">
         <div className="w-80 h-80 bg-red-400 p-4 rounded-lg shadow-lg flex flex-wrap justify-center items-center">
@@ -73,10 +73,10 @@ const GameStandardUI = ({
       </div>
 
       {/* Reset Button */}
-      <div className="w-full flex justify-center items-center py-6">
+      <div className="w-full flex justify-center items-center">
         <button
           onClick={handleReset}
-          className="bg-red-600 text-white px-6 py-3 rounded-xl shadow-lg hover:bg-red-700 text-2xl"
+          className="bg-red-600 text-white m-2 p-2 lg:px-6 lg:py-3 rounded-xl shadow-lg hover:bg-red-700 text-2xl"
         >
           Reset
         </button>
