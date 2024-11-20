@@ -35,9 +35,9 @@ const LandingPage = ({ onStartGame }) => {
       </div>
 
       {/* Footer */}
-      <footer className="mt-12 text-sm opacity-70 pb-2">
+      <footer className="mt-12 text-sm opacity-70 pb-2 flex flex-col items-center justify-center text-center">
         <p>Created with ❤️ by Saif.</p>
-        <p>Player vs Player, 5x5 and 6x6 boards wll be released soon.</p>
+        <p>Player vs Player, 6x6 board and new ability wll be released soon.</p>
       </footer>
     </div>
   );

@@ -2,7 +2,10 @@
 "use client";
 import React, { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { gameBot5x5 } from "../GameBot5v5/page";
+import { gameBot4x4 } from "../GameBot4x4/page";
+import { checkBoard } from "../Game/GameStandardRules";
+import { initilaiseGrid } from "../Game/helperDiag";
+import Game5x5UI from "./Game5x5UI";
 
 const Game5x5 = () => {
   const router = useRouter();
@@ -20,566 +23,318 @@ const Game5x5 = () => {
   const [currPlayer, setcurrPlayer] = useState("");
   const scoredPositionsRow = useRef(new Set());
   const scoredPositionsCol = useRef(new Set());
-  const flags = useRef({
-    leftSmallLeftDiagFlag: true,
-    leftSmallRightDiagFlag: true,
-    leftTinyLeftDiagFlag: true,
-    leftTinyRightDiagFlag: true,
-    rightSmallTopDiagFlag: true,
-    rightSmallBotDiagFlag: true,
-    rightTinyTopDiagFlag: true,
-    rightTinyBotDiagFlag: true,
-    leftDiagMain: true,
-    rightDiagMain: true,
-  });
+  const scoredPointsLeftDiag = useRef(new Set());
+  const scoredPointsRightDiag = useRef(new Set());
   const [specialMove, setSpecialMove] = useState(false);
+  const [botSpecialMove, setbotSpecialMove] = useState(false);
   const [winner, setWinner] = useState("");
-  //console.log("main fucntion:", scoredPositionsRow);
-
-  const initilaiseGrid = () => {
-    let flatGrid = grid.flat();
-
-    let randomX = Math.floor(Math.random() * flatGrid.length);
-    let randomO = Math.floor(Math.random() * flatGrid.length);
-
-    while (randomX === randomO) {
-      randomO = Math.floor(Math.random() * flatGrid.length);
-    }
-    flatGrid[randomX] = "X";
-    flatGrid[randomO] = "O";
-
-    let newGrid = [];
-    while (flatGrid.length) {
-      newGrid.push(flatGrid.splice(0, 5));
-    }
-    //console.log(newGrid);
-    setGrid(newGrid);
-  };
-  console.log(grid);
-  const checkBoard = (board, scoredPositionsCol, scoredPositionsRow, flags) => {
-    //console.log("this is anayseboard", scoredPositionsRow);
-    const checkRow = (board, scoredPositionsRow) => {
-      let verdict = [];
-
-      for (let rowIndex = 0; rowIndex < board.length; rowIndex++) {
-        let row = board[rowIndex];
-
-        // Check for 3 consecutive symbols for scoring points
-        for (let i = 0; i < row.length - 2; i++) {
-          if (scoredPositionsRow.has(`${rowIndex}-${i}`)) {
-            continue;
-          }
-          if (
-            row[i] === row[i + 1] &&
-            row[i + 1] === row[i + 2] &&
-            row[i] !== "."
-          ) {
-            verdict[0] = row[i]; // Scoring 3 consecutive symbols
-            scoredPositionsRow.add(`${rowIndex}-${i}`); // Mark the sequence as scored
-          }
-        }
-
-        // Check for 5 consecutive symbols for winning
-        for (let i = 0; i < row.length - 4; i++) {
-          if (
-            row[i] === row[i + 1] &&
-            row[i + 1] === row[i + 2] &&
-            row[i + 2] === row[i + 3] &&
-            row[i + 3] === row[i + 4] &&
-            row[i] !== "."
-          ) {
-            verdict[1] = row[i]; // Winning 5 consecutive symbols
-            break; // No need to check further for a winner in this row
-          }
-        }
-      }
-
-      if (verdict[0] === undefined) {
-        verdict[0] = null; // No points scored
-      }
-      if (verdict[1] === undefined) {
-        verdict[1] = null; // No winner found
-      }
-
-      return verdict;
-    };
-
-    const checkCol = (board, scoredPositionsCol) => {
-      let colArr = []; // To store columns
-      let verdict = [];
-
-      // Construct columns from the board
-      for (let i = 0; i < board[0].length; i++) {
-        let col = board.map((row) => row[i]);
-        colArr.push(col);
-      }
-
-      // Iterate through each column
-      for (let colIndex = 0; colIndex < colArr.length; colIndex++) {
-        let col = colArr[colIndex];
-
-        // Check for 3 consecutive symbols (points)
-        for (let i = 0; i < col.length - 2; i++) {
-          if (scoredPositionsCol.has(`${i}-${colIndex}`)) {
-            continue;
-          }
-          if (
-            col[i] === col[i + 1] &&
-            col[i + 1] === col[i + 2] &&
-            col[i] !== "."
-          ) {
-            verdict[0] = col[i]; // Record symbol for 3 consecutive points
-            scoredPositionsCol.add(`${i}-${colIndex}`); // Mark this position as scored
-          }
-        }
-
-        // Check for 5 consecutive symbols (win condition)
-        for (let i = 0; i < col.length - 4; i++) {
-          if (
-            col[i] === col[i + 1] &&
-            col[i + 1] === col[i + 2] &&
-            col[i + 2] === col[i + 3] &&
-            col[i + 3] === col[i + 4] &&
-            col[i] !== "."
-          ) {
-            verdict[1] = col[i]; // Record winner
-            break; // No need to check further for a winner in this column
-          }
-        }
-      }
-
-      if (verdict[0] === undefined) verdict[0] = null; // No points scored
-      if (verdict[1] === undefined) verdict[1] = null; // No winner found
-
-      return verdict;
-    };
-
-    const checkDiagonal = (board, flags) => {
-      const leftDiagonal = (board, flags) => {
-        let verdict = [null, null]; // [points, winner]
-
-        // Define diagonals
-        const mainDiagonal = []; // Main diagonal (5 cells)
-        const topSmallDiag = [
-          board[0][1],
-          board[1][2],
-          board[2][3],
-          board[3][4],
-        ]; // 4 cells
-        const bottomSmallDiag = [
-          board[1][0],
-          board[2][1],
-          board[3][2],
-          board[4][3],
-        ]; // 4 cells
-        const topTinyDiag = [board[0][2], board[1][3], board[2][4]]; // 3 cells
-        const bottomTinyDiag = [board[2][0], board[3][1], board[4][2]]; // 3 cells
-
-        // Build main diagonal
-        for (let i = 0; i < board.length; i++) {
-          mainDiagonal.push(board[i][i]);
-        }
-
-        // Helper function to check points in a diagonal
-        const checkDiagonalPoints = (
-          diagonal,
-          flagName,
-          rowOffsets,
-          colOffsets
-        ) => {
-          if (!flags[flagName]) return null;
-
-          // Check for 3 consecutive symbols for points
-          for (let i = 0; i < diagonal.length - 2; i++) {
-            if (
-              diagonal[i] === diagonal[i + 1] &&
-              diagonal[i + 1] === diagonal[i + 2] &&
-              diagonal[i] !== "."
-            ) {
-              flags[flagName] = false;
-              verdict[0] = diagonal[i]; // Points scored
-              return { row: rowOffsets[i], col: colOffsets[i] }; // Return the position
-            }
-          }
-        };
-
-        // Helper function to check for winner in a diagonal
-        const checkDiagonalWinner = (diagonal) => {
-          for (let i = 0; i < diagonal.length - 4; i++) {
-            if (
-              diagonal[i] === diagonal[i + 1] &&
-              diagonal[i + 1] === diagonal[i + 2] &&
-              diagonal[i + 2] === diagonal[i + 3] &&
-              diagonal[i + 3] === diagonal[i + 4] &&
-              diagonal[i] !== "."
-            ) {
-              verdict[1] = diagonal[i]; // Winner found
-              return;
-            }
-          }
-        };
-
-        // Check all diagonals for points and winner
-        checkDiagonalPoints(
-          mainDiagonal,
-          "leftDiagMain",
-          [0, 1, 2, 3, 4],
-          [0, 1, 2, 3, 4]
-        );
-        checkDiagonalPoints(
-          topSmallDiag,
-          "leftSmallRightDiagFlag",
-          [0, 1, 2, 3],
-          [1, 2, 3, 4]
-        );
-        checkDiagonalPoints(
-          bottomSmallDiag,
-          "leftSmallLeftDiagFlag",
-          [1, 2, 3, 4],
-          [0, 1, 2, 3]
-        );
-        checkDiagonalPoints(
-          topTinyDiag,
-          "leftTinyRightDiagFlag",
-          [0, 1, 2],
-          [2, 3, 4]
-        );
-        checkDiagonalPoints(
-          bottomTinyDiag,
-          "leftTinyLeftDiagFlag",
-          [2, 3, 4],
-          [0, 1, 2]
-        );
-
-        // Check for winner in main diagonal
-        checkDiagonalWinner(mainDiagonal);
-
-        // Return verdict
-        return verdict;
-      };
-
-      const rightDiagonal = (board, flags) => {
-        let verdict = [null, null]; // [points, winner]
-
-        // Define diagonals
-        const mainDiagonal = []; // Main diagonal (5 cells)
-        const topSmallDiag = [
-          board[0][3],
-          board[1][2],
-          board[2][1],
-          board[3][0],
-        ]; // 4 cells
-        const bottomSmallDiag = [
-          board[1][4],
-          board[2][3],
-          board[3][2],
-          board[4][1],
-        ]; // 4 cells
-        const topTinyDiag = [board[0][2], board[1][1], board[2][0]]; // 3 cells
-        const bottomTinyDiag = [board[2][4], board[3][3], board[4][2]]; // 3 cells
-
-        // Build main diagonal (right-to-left)
-        for (let i = 0; i < board.length; i++) {
-          mainDiagonal.push(board[i][board.length - 1 - i]);
-        }
-
-        // Helper function to check points in a diagonal
-        const checkDiagonalPoints = (
-          diagonal,
-          flagName,
-          rowOffsets,
-          colOffsets
-        ) => {
-          if (!flags[flagName]) return null;
-
-          // Check for 3 consecutive symbols for points
-          for (let i = 0; i < diagonal.length - 2; i++) {
-            if (
-              diagonal[i] === diagonal[i + 1] &&
-              diagonal[i + 1] === diagonal[i + 2] &&
-              diagonal[i] !== "."
-            ) {
-              flags[flagName] = false;
-              verdict[0] = diagonal[i]; // Points scored
-              return { row: rowOffsets[i], col: colOffsets[i] }; // Return the position
-            }
-          }
-        };
-
-        // Helper function to check for winner in a diagonal
-        const checkDiagonalWinner = (diagonal) => {
-          for (let i = 0; i < diagonal.length - 4; i++) {
-            if (
-              diagonal[i] === diagonal[i + 1] &&
-              diagonal[i + 1] === diagonal[i + 2] &&
-              diagonal[i + 2] === diagonal[i + 3] &&
-              diagonal[i + 3] === diagonal[i + 4] &&
-              diagonal[i] !== "."
-            ) {
-              verdict[1] = diagonal[i]; // Winner found
-              return;
-            }
-          }
-        };
-
-        // Check all diagonals for points and winner
-        checkDiagonalPoints(
-          mainDiagonal,
-          "rightDiagMain",
-          [0, 1, 2, 3, 4],
-          [4, 3, 2, 1, 0]
-        );
-        checkDiagonalPoints(
-          topSmallDiag,
-          "rightSmallTopDiagFlag",
-          [0, 1, 2, 3],
-          [3, 2, 1, 0]
-        );
-        checkDiagonalPoints(
-          bottomSmallDiag,
-          "rightSmallBotDiagFlag",
-          [1, 2, 3, 4],
-          [4, 3, 2, 1]
-        );
-        checkDiagonalPoints(
-          topTinyDiag,
-          "rightTinyTopDiagFlag",
-          [0, 1, 2],
-          [2, 1, 0]
-        );
-        checkDiagonalPoints(
-          bottomTinyDiag,
-          "rightTinyBotDiagFlag",
-          [2, 3, 4],
-          [4, 3, 2]
-        );
-
-        // Check for winner in main diagonal
-        checkDiagonalWinner(mainDiagonal);
-
-        // Return verdict
-        return verdict;
-      };
-
-      let leftDiagVerdict = leftDiagonal(board, flags);
-      if (leftDiagVerdict[0] !== null || leftDiagVerdict[1] !== null) {
-        return leftDiagVerdict;
-      }
-
-      let rightDiagVerdict = rightDiagonal(board, flags);
-      if (rightDiagVerdict[0] !== null || rightDiagVerdict[1] !== null) {
-        return rightDiagVerdict;
-      }
-
-      return [null, null];
-    };
-
-    let rowVerdict = checkRow(board, scoredPositionsRow);
-    if (rowVerdict[0] !== null || rowVerdict[1] !== null) {
-      return rowVerdict;
-    }
-    let colVerdict = checkCol(board, scoredPositionsCol);
-    if (colVerdict[0] !== null || colVerdict[1] !== null) {
-      return colVerdict;
-    }
-    let diagVerdict = checkDiagonal(board, flags);
-    if (diagVerdict[0] !== null || diagVerdict[1] !== null) {
-      return diagVerdict;
-    }
-    return [null, null];
-  };
+  const [winnerFound, setwinnerFound] = useState(false);
+  const [highlightGrid, setHighlightGrid] = useState(
+    Array(grid.length)
+      .fill(null)
+      .map(() => Array(grid[0].length).fill(false))
+  );
+  const [draw, setDraw] = useState(false);
 
   useEffect(() => {
-    initilaiseGrid();
+    setGrid(initilaiseGrid(grid, 5));
     setPlayer1(localStorage.getItem("Player1"));
     setPlayer2(localStorage.getItem("Player2"));
     setcurrPlayer(localStorage.getItem("CurrPlayer"));
-  }, [initilaiseGrid]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+  //console.log(grid);
+  //console.log(typeof botSpecialMove);
+
+  useEffect(() => {
+    // Update the score
+    if (!winnerFound) {
+      updateScore();
+    }
+
+    // Check if the game should end
+    if (winner || winnerFound) {
+      console.log("Winner found or game over. Updating state.");
+      setPlayer1Points(0);
+      setPlayer2Points(0);
+      return; // Exit early
+    }
+
+    // Check for a draw
+    if (!grid.flat().includes(".")) {
+      console.log("It's a draw!");
+      checkDraw();
+    }
+  }, [grid]); // Trigger whenever the grid changes
+
+  useEffect(() => {
+    if (winner || winnerFound) {
+      console.log("Game is over. Bot logic skipped.");
+      return; // Stop further execution if the game is over
+    }
+
+    if (specialMove) {
+      console.log("Special move activated, setting player1's turn.");
+      setcurrPlayer(player1);
+      return;
+    }
+
+    if (botSpecialMove) {
+      console.log("Bot special move triggered.");
+      handleBotMove(player2); // Bot takes a special move
+      return;
+    }
+
+    if (currPlayer === player2 && player1 && grid.flat().includes(".")) {
+      console.log("Bot is making a normal move.");
+      handleBotMove(player2); // Normal bot move
+    }
+  }, [grid, winner, winnerFound, botSpecialMove, currPlayer]); // Dependencies include winner and winnerFound
 
   const handleReset = () => {
     router.push("/");
   };
+  const applyHighlights = (highlights, won) => {
+    console.log("Highlights to apply:", highlights);
 
-  const updateScore = () => {
-    const verdict = checkBoard(
-      grid,
-      scoredPositionsRow.current,
-      scoredPositionsCol.current,
-      flags.current
-    );
-    console.log("verdict at op ", verdict);
-    if (verdict === null) return;
-
-    if (verdict[0] === "X") {
-      setPlayer1Points((prev) => prev + 1);
-    } else if (verdict[0] === "O") {
-      setPlayer2Points((prev) => prev + 1);
+    setHighlightGrid((prev) => {
+      const newHighlightGrid = prev.map((row) => row.map(() => false)); // Reset highlights
+      highlights?.forEach(([r, c]) => {
+        if (r >= 0 && r < prev.length && c >= 0 && c < prev[0].length) {
+          newHighlightGrid[r][c] = true; // Set true for highlighted cells
+        } else {
+          console.error(`Invalid highlight index: row ${r}, col ${c}`);
+        }
+      });
+      return newHighlightGrid;
+    });
+    if (!won) {
+      // Clear highlights after 1 second
+      setTimeout(() => {
+        setHighlightGrid(
+          (prev) => prev.map((row) => row.map(() => false)) // Reset highlights
+        );
+      }, 1000);
     }
-    if (verdict[1] === "X" || verdict[1] === "O") {
-      setWinner(verdict[1]);
+    setHighlightGrid((prev) => prev);
+  };
+
+  const checkDraw = () => {
+    let open = grid.flat().filter((item) => item === ".");
+    if (open.length === 0) {
+      setDraw(true);
+      window.alert("6x6 board soon!");
+      router.push("./Game5x5");
     }
   };
 
-  useEffect(() => {
-    updateScore();
-    if (
-      !winner &&
-      player1 &&
-      player2 &&
-      currPlayer === player2 &&
-      grid.flat().includes(".")
-    ) {
-      handleBotMove();
-    }
-  }, [grid]);
+  const updateScore = () => {
+    const { highlight, verdict } = checkBoard(
+      grid,
+      scoredPositionsRow.current,
+      scoredPositionsCol.current,
+      scoredPointsLeftDiag.current,
+      scoredPointsRightDiag.current
+    );
+    console.log("Verdit at op is ", verdict, highlight);
 
-  console.log(specialMove);
+    if (!verdict) return;
 
-  const handleSpecialMove = (user) => {
-    if (user === player1) {
-      setPlayer1Points(0);
+    if (verdict[1] === player1 || verdict[1] === player2) {
+      let won = true;
+      applyHighlights(highlight, won);
+
+      // Set winner and mark the game as won
+      setWinner(verdict[1]);
+      setwinnerFound(true);
+
+      // Exit the function immediately after detecting a winner
+      return;
     }
-    if (user === player2) {
-      setPlayer2Points(0);
+
+    if (verdict[0] === player1) {
+      if (!specialMove) {
+        setPlayer1Points((prev) => prev + 1);
+      }
+      applyHighlights(highlight);
+    } else if (verdict[0] === player2) {
+      if (!botSpecialMove) {
+        setPlayer2Points((prev) => prev + 1);
+      }
+      applyHighlights(highlight);
     }
-    let specialPlayer = currPlayer === player1 ? player2 : player1;
-    setcurrPlayer(specialPlayer);
-    setSpecialMove(true);
   };
 
   const handleMove = (index) => {
     let row = Math.floor(index / grid.length);
     let col = index % grid.length;
 
+    if (winnerFound) {
+      window.alert("Game ended, try again");
+      router.push("/");
+      return;
+    }
+
     if (specialMove) {
       if (grid[row][col] === currPlayer) {
-        window.alert("Slect opponent cells");
+        window.alert("Select opponent cells");
+        return;
       }
+
       setGrid((prev) => {
         let newGrid = prev.map((row) => [...row]);
         newGrid[row][col] = currPlayer;
-        let newPlayer = currPlayer === player1 ? player2 : player1;
-        setcurrPlayer(newPlayer);
+
+        setSpecialMove(false); // End the special move
+        setcurrPlayer(player2); // Pass the turn back to the bot after special move
         return newGrid;
       });
+      return;
     }
-
-    if (grid[row][col] === ".") {
-      setGrid((prev) => {
-        let newGrid = prev.map((row) => [...row]);
-        newGrid[row][col] = currPlayer;
-        let newPlayer = currPlayer === player1 ? player2 : player1;
-        setcurrPlayer(newPlayer);
-        return newGrid;
-      });
-    }
-    return grid;
-  };
-
-  const handleBotMove = () => {
-    //special move
-    if (currPlayer === player2 && grid.flat().includes(".")) {
-      let bot = player2;
-      let human = player1;
-      const move = gameBot5x5(
-        grid,
-        bot,
-        human,
-        scoredPositionsRow.current,
-        scoredPositionsCol.current,
-        flags.current
-      );
-
-      if (move) {
+    if (currPlayer === player1 && !winnerFound) {
+      if (grid[row][col] === ".") {
         setGrid((prev) => {
-          let newGrid = prev.map((item) => [...item]);
-          newGrid[move.row][move.col] = bot;
+          let newGrid = prev.map((row) => [...row]);
+          newGrid[row][col] = currPlayer;
 
-          setcurrPlayer(player1);
+          let newPlayer = currPlayer === player1 ? player2 : player1;
+          if (player1Points === 2) {
+            let crucialPoint = checkBoard(
+              newGrid,
+              scoredPositionsRow.current,
+              scoredPositionsCol.current,
+              scoredPointsLeftDiag.current,
+              scoredPointsRightDiag.current
+            );
+            if (crucialPoint.verdict && crucialPoint.verdict[0] === player1) {
+              console.log("Player 1 triggers a special move!");
+              setSpecialMove(true);
+              setcurrPlayer(player1); // Trigger special move for Player 1
+              let won = true;
+              applyHighlights(crucialPoint.highlight, won);
+              setPlayer1Points(0); // Reset points after special move
+              return newGrid; // Allow Player 1 to play again
+            }
+          }
+
+          setcurrPlayer(newPlayer);
           return newGrid;
         });
       }
+    } else {
+      console.log("Not your move");
     }
   };
-  //console.log(checkBoard(grid));
+
+  const handleBotMove = (currentPlayer) => {
+    if (currentPlayer === player2 && !winnerFound) {
+      let bot = player2;
+      let human = player1;
+      let time = botSpecialMove ? 4000 : 2000;
+
+      // Local variable to track if the bot should continue
+      let botMoveCancelled = false;
+
+      setTimeout(() => {
+        // Re-check `winnerFound` before proceeding
+        if (winnerFound || botMoveCancelled) {
+          console.log("Bot move cancelled, winner found:", winnerFound);
+          return;
+        }
+
+        // Special Move Handling
+        if (botSpecialMove) {
+          console.log("Bot is using its special move.");
+          const move = gameBot4x4(
+            grid,
+            bot,
+            human,
+
+            botSpecialMove
+          );
+
+          if (move) {
+            setGrid((prev) => {
+              // Re-check `winnerFound` during grid update
+              if (winnerFound) {
+                console.log("Game ended during bot special move.");
+                return prev; // Do not update grid if winner is found
+              }
+              let newGrid = prev.map((row) => [...row]);
+              newGrid[move.row][move.col] = bot;
+
+              setbotSpecialMove(false); // End special move
+              setcurrPlayer(player1); // Pass turn to player1
+              console.log("Special move ends.");
+              return newGrid;
+            });
+            return;
+          }
+        }
+
+        // Normal Move Handling
+        const move = gameBot4x4(grid, bot, human);
+
+        if (move) {
+          console.log(move);
+          setGrid((prev) => {
+            // Re-check `winnerFound` during grid update
+            if (winnerFound) {
+              console.log("Game ended during bot normal move.");
+              return prev; // Do not update grid if winner is found
+            }
+
+            let newGrid = prev.map((row) => [...row]);
+            newGrid[move.row][move.col] = bot;
+
+            if (player2Points === 2) {
+              let newPoint = checkBoard(
+                newGrid,
+                scoredPositionsRow.current,
+                scoredPositionsCol.current,
+                scoredPointsLeftDiag.current,
+                scoredPointsRightDiag.current
+              );
+              if (newPoint.verdict && newPoint.verdict[0] === player2) {
+                console.log("Bot triggers a special move!");
+                setbotSpecialMove(true);
+                let won = true;
+                applyHighlights(newPoint.highlight, won);
+                setPlayer2Points(0);
+                return newGrid; // Bot continues its turn
+              }
+            }
+
+            setcurrPlayer(player1); // Switch turn to player1
+            return newGrid;
+          });
+        }
+      }, time);
+
+      // Cleanup mechanism if the winner changes during the timeout
+      return () => {
+        botMoveCancelled = true;
+      };
+    }
+  };
+
   return (
-    <div className="flex flex-col gap-6 justify-center items-center h-screen">
-      <div className="h-28 w-96 bg-red-300 flex flex-col justify-start items-center text-2xl">
-        {winner && (
-          <div className="font-bold text-2xl items-center text-center pt-10">
-            {winner} has won the game!
-          </div>
-        )}
-        {!winner && (
-          <>
-            <div className="flex justify-around items-center w-full ">
-              <div>Player1: {player1}</div>
-              <div>Player2: {player2}</div>
-            </div>
-            <div className="flex flex-col items-center justify-center">
-              Current player
-              <span>
-                {currPlayer}
-                {specialMove && <span> &apos; special move</span>}
-              </span>
-            </div>
-          </>
-        )}
-      </div>
-      <div className="flex flex-row justify-center items-center w-full gap-10">
-        <div className="h-96 w-40 bg-red-500 flex flex-col justify-evenly text-center text-4xl">
-          <div className="text-xl h-1/4">Points</div>
-          <div className="flex flex-row items-start justify-center h-3/4 ">
-            <div className=" flex flex-col border-2 w-1/2 h-full pt-2">
-              <span>{player1}</span>
-              {player1Points}
-              {player1Points >= 3 && (
-                <button
-                  onClick={() => handleSpecialMove(player1)}
-                  className="m-2 p-2 bg-green-300 shadow-xl rounded-xl text-xl"
-                >
-                  Special ability
-                </button>
-              )}
-            </div>
-            <div className="flex flex-col border-2 w-1/2 h-full pt-2">
-              <span>{player2}</span>
-              {player2Points}
-              {player2Points >= 3 && (
-                <button
-                  onClick={() => handleSpecialMove(player2)}
-                  className="m-2 p-2 bg-green-300 shadow-xl rounded-xl text-xl"
-                >
-                  Special ability
-                </button>
-              )}
-            </div>
-          </div>
-        </div>
-        <div className="h-[500px] w-[480px] bg-red-300 flex flex-row flex-wrap overflow-hidden">
-          {grid.flat().map((cell, index) => {
-            return (
-              <div
-                key={index}
-                onClick={() => handleMove(index)}
-                className={`${
-                  winner ? "cursor-not-allowed" : "cursor-pointer"
-                } h-20 w-20 bg-white m-2 text-6xl text-black flex items-center justify-center hover:rounded-xl hover:shadow-xl`}
-              >
-                {cell}
-              </div>
-            );
-          })}
-        </div>
-        {/* <div className="h-96 w-80 bg-red-500">Rules</div> */}
-      </div>
-      <button
-        onClick={handleReset}
-        className="text-white m-2 p-2 bg-red-700 shadow-xl rounded-xl hover:scale-125"
-      >
-        {" "}
-        Reset
-      </button>
+    <div>
+      <Game5x5UI
+        handleMove={handleMove}
+        winner={winner}
+        player1={player1}
+        player2={player2}
+        currPlayer={currPlayer}
+        specialMove={specialMove}
+        player1Points={player1Points}
+        player2Points={player2Points}
+        grid={grid}
+        handleReset={handleReset}
+        highlightGrid={highlightGrid}
+        botSpecialMove={botSpecialMove}
+        draw={draw}
+      />
     </div>
   );
 };

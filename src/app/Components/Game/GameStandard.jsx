@@ -26,17 +26,17 @@ const GameLogic = () => {
 
   useEffect(() => {
     // Check for a winner or draw
-    const result = checkBoard(grid);
+    const { verdict, highlight } = checkBoard(grid);
 
-    console.log(result);
-    if (result.winner) {
-      setWinner(result.winner); // Update the winner
-      console.log("Winner:", result.winner);
-      console.log("Winning Highlights:", result.highlights);
+    console.log(verdict, highlight);
+    if (verdict[1]) {
+      setWinner(verdict[1]); // Update the winner
+      console.log("Winner:", verdict[1]);
+      console.log("Winning Highlights:", highlight);
 
       // Apply highlights for the winning cells
-      if (result.highlights.length > 0) {
-        applyHighlights(result.highlights);
+      if (highlight.length > 0) {
+        applyHighlights(highlight);
       }
     } else if (!grid.flat().includes(".")) {
       checkDraw(); // Check if it's a draw
@@ -167,6 +167,7 @@ const GameLogic = () => {
         highlightGrid={highlightGrid}
         playAgain={playAgain}
         handleMove={handleMove}
+        draw={draw}
       />
     </div>
   );
