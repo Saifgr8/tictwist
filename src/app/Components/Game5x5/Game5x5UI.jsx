@@ -227,7 +227,7 @@ const Game5x5UI = ({
           {showRules && (
             <ul className="list-disc px-6 mt-4 text-left text-sm md:text-sm lg:text-xl">
               <li>Take turns to leave your mark and outwit your opponent!</li>
-              <li>Form a perfect line of 4 to claim victory!</li>
+              <li>Form a perfect line of 5 to claim victory!</li>
               <li>
                 Craft combos of 3 in rows, columns, or diagonals to score
                 points!
