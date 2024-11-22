@@ -43,51 +43,68 @@ const Game4x4UI = ({
       {/* Top Section */}
       <div
         className={`  ${
-          winner ? "w-full md:w-4/6 lg:w-3/6" : "w-4/5 md:w-3/6"
+          winner ? "w-11/12 md:w-4/6 lg:w-3/6" : "w-4/5 md:w-3/6"
         } bg-gradient-to-b from-blue-300 to-red-400 mt-3 rounded-xl shadow-2xl`}
       >
         <div className="w-full flex flex-row justify-evenly items-center">
           <div className="m-2 p-2 flex flex-col justify-center items-center gap-3">
             {winner ? (
-              <div className="text-center text-xl">
+              <div className="text-center sm:text-xl">
                 {winner === player1 ? (
-                  <span className="font-bold">You have won the game!</span>
+                  <span className="font-bold w-full text-center">
+                    You have won the game!, starting bigger board.
+                  </span>
                 ) : (
-                  <div className="flex flex-col">
+                  <div className="flex flex-col items-center justify-center">
                     <span className="font-bold">Ai Bot has won the game</span>
                     <span>Better luck next time..</span>
                   </div>
                 )}
               </div>
             ) : (
-              <>
-                <div className="flex justify-around items-center w-full gap-5 lg:text-2xl  ">
-                  <div>You: {player1}</div>
-                  <div>AI Bot: {player2}</div>
+              <div className="flex flex-col justify-center items-center w-full">
+                <div className="flex flex-col items-center w-full gap-5 lg:text-2xl ">
+                  <div className="flex justify-between items-center w-full gap-4">
+                    <div className="text-center">You: {player1}</div>
+                    <div className="text-center">AI Bot: {player2}</div>
+                  </div>
                 </div>
-                <div className="flex flex-col items-center justify-center mt-2 lg:text-2xl">
-                  Current Player
-                  <span className="font-bold">
-                    {draw && <div className="animate-pulse">Bot is starting bigger board</div>}
+                <div className="flex flex-col items-center justify-center mt-4 lg:text-2xl w-full">
+                  <div className="text-center">Current Player</div>
+                  <div className="font-bold flex flex-col justify-center items-center mt-2">
+                    {draw && (
+                      <div className="animate-pulse w-full text-center">
+                        Bot is starting bigger board
+                      </div>
+                    )}
                     {!specialMove &&
                       !botSpecialMove &&
+                      !draw &&
                       (currPlayer === player1 ? "You" : "Bot")}
 
-                    {specialMove && <span>Your Special Move</span>}
-                    {botSpecialMove && <span>Bot Special Move</span>}
-                  </span>
+                    {specialMove && (
+                      <span className="w-full text-center">
+                        Your Special Move
+                      </span>
+                    )}
+                    {botSpecialMove && (
+                      <span className="w-full text-center">
+                        Bot Special Move
+                      </span>
+                    )}
+                  </div>
                 </div>
-              </>
+              </div>
             )}
           </div>
-          <div className="m-2 p-2 flex flex-col justify-center items-center gap-1">
+          <div className="m-2 p-2 flex flex-col justify-center items-center gap-1 w-1/2">
             <div className="font-bold text-xl lg:text-2xl lg:m-1 lg:p-1 md:m-2 md:p-2">
               Points
             </div>
             <div className="flex justify-around items-center lg:mt-4 gap-5">
               <div className="flex flex-col items-center">
-                <div className=" text-xl lg:text-2xl">You</div>
-                <div className="text-3xl md:text-2xl lg:text-4xl lg:mt-3">
+                <div className="  md:text-xl lg:text-2xl">You</div>
+                <div className="text-xl md:text-2xl lg:text-4xl lg:mt-3">
                   {player1Points}
                 </div>
                 {specialMove && (
@@ -103,12 +120,12 @@ const Game4x4UI = ({
                 )}
               </div>
               <div className="flex flex-col items-center">
-                <div className=" text-xl lg:text-2xl">AI Bot</div>
-                <div className=" text-3xl md:text-2xl lg:text-4xl lg:mt-3">
+                <div className="  md:text-xl lg:text-2xl">AI Bot</div>
+                <div className=" text-xl md:text-2xl lg:text-4xl lg:mt-3">
                   {player2Points}
                 </div>
                 {botSpecialMove && (
-                  <div className="mt-2 p-2 bg-green-300 shadow rounded-xl text-sm sm:text-lg animate-pulse">
+                  <div className="mt-2 p-2 bg-green-300 shadow rounded-xl text-sm sm:text-lg animate-pulse w-full text-center">
                     Bot is using special ability
                   </div>
                 )}
@@ -139,10 +156,10 @@ const Game4x4UI = ({
         )}
       </div>
       {/* Main Game Section */}
-      <div className="flex flex-col md:flex-row justify-center sm:items-start items-center gap-2 pb-4 h-[calc(100%/4-0.5rem)]">
+      <div className="flex flex-col md:flex-row justify-center sm:items-start items-center gap-2 pb-4 sm:h-[calc(100%/4-0.5rem)]">
         {/* Game Board */}
         <div
-          className="w-full max-w-[450px] sm:max-w-[400px] bg-red-400 p-4 flex flex-wrap justify-center items-center shadow-inner shadow-green-100 rounded-lg"
+          className="w-11/12 max-w-[450px] sm:max-w-[400px] bg-red-400 p-4 flex flex-wrap justify-center items-center shadow-inner shadow-green-100 rounded-lg"
           style={{ aspectRatio: "1" }} // Maintain square aspect ratio
         >
           {grid.map((rowArray, rowIndex) =>
@@ -172,7 +189,7 @@ const Game4x4UI = ({
         <div
           className={`${
             showRules
-              ? "w-full sm:w-1/3 md:w-2/5 max-h-[400px] overflow-y-auto scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-gray-200 bg-gray-100 p-4 text-center text-lg sm:text-xl border-2 shadow-2xl rounded-lg transition-all duration-1000 ease-in-out"
+              ? "w-11/12 sm:w-1/3 md:w-2/5 max-h-[400px] overflow-y-auto scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-gray-200 bg-gray-100 p-4 text-center text-lg sm:text-xl border-2 shadow-2xl rounded-lg transition-all duration-1000 ease-in-out"
               : "w-fit sm:fixed sm:right-0 sm:top-1/2 sm:transform sm:-translate-y-1/2 p-2 bg-gray-100 rounded-xl shadow-2xl transition-all duration-1000 ease-in-out"
           }`}
         >

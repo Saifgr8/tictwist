@@ -244,7 +244,7 @@ const Game4x4 = () => {
           newGrid[row][col] = currPlayer;
 
           let newPlayer = currPlayer === player1 ? player2 : player1;
-          if (player1Points === 2) {
+          if (player1Points >= 2) {
             let crucialPoint = checkBoard(
               newGrid,
               scoredPositionsRow.current,
@@ -325,7 +325,7 @@ const Game4x4 = () => {
             let newGrid = prev.map((row) => [...row]);
             newGrid[move.row][move.col] = bot;
 
-            if (player2Points === 2) {
+            if (player2Points >= 2) {
               let newPoint = checkBoard(
                 newGrid,
                 scoredPositionsRow.current,

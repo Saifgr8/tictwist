@@ -48,7 +48,7 @@ const Game5x5UI = ({
         } bg-gradient-to-b from-blue-300 to-red-400 mt-3 rounded-xl shadow-2xl`}
       >
         <div className="w-full flex flex-row justify-evenly items-center">
-          <div className="m-2 p-2 flex flex-col justify-center items-center gap-3">
+          <div className="m-2 p-2 flex flex-col justify-center items-center gap-3 w-1/2">
             {winner ? (
               <div className="text-center text-xl">
                 {winner === player1 ? (
@@ -61,28 +61,39 @@ const Game5x5UI = ({
                 )}
               </div>
             ) : (
-              <>
-                <div className="flex md:flex-row flex-col justify-center items-center w-full md:gap-5 lg:text-2xl ">
-                  <div>You: {player1}</div>
-                  <div>AI Bot: {player2}</div>
+              <div className="flex flex-col justify-center items-center w-full">
+                <div className="flex flex-col items-center w-full gap-5 lg:text-2xl ">
+                  <div className="flex justify-between items-center w-full">
+                    <div className="text-center">You: {player1}</div>
+                    <div className="text-center">AI Bot: {player2}</div>
+                  </div>
                 </div>
-                <div className="flex flex-col items-center justify-center mt-2 text-sm lg:text-xl">
-                  Current Player
-                  <span className="font-bold">
+                <div className="flex flex-col items-center justify-center mt-4 lg:text-2xl w-full">
+                  <div className="text-center">Current Player</div>
+                  <div className="font-bold flex flex-col justify-center items-center mt-2">
                     {draw && (
-                      <div className="animate-pulse">
+                      <div className="animate-pulse w-full text-center">
                         Bot is starting bigger board
                       </div>
                     )}
                     {!specialMove &&
                       !botSpecialMove &&
+                      !draw &&
                       (currPlayer === player1 ? "You" : "Bot")}
 
-                    {specialMove && <span>Your Special Move</span>}
-                    {botSpecialMove && <span>Bot Special Move</span>}
-                  </span>
+                    {specialMove && (
+                      <span className="w-full text-center">
+                        Your Special Move
+                      </span>
+                    )}
+                    {botSpecialMove && (
+                      <span className="w-full text-center">
+                        Bot Special Move
+                      </span>
+                    )}
+                  </div>
                 </div>
-              </>
+              </div>
             )}
           </div>
           <div className="m-2 p-2 flex flex-col justify-center items-center gap-1 w-1/2">

@@ -44,7 +44,7 @@ const GameStandardUI = ({
                       You are playing
                     </div>
                   ) : draw ? (
-                    <div className="italic animate-pulse">
+                    <div className="italic animate-pulse w-full text-center">
                       Bot is starting bigger board!
                     </div>
                   ) : (
@@ -114,7 +114,7 @@ const GameStandardUI = ({
         <div className="absolute lg:top-0 lg:left-0 lg:right-0 min-h-screen w-screen bg-black bg-opacity-50 flex flex-col justify-center items-center">
           <div className="bg-gradient-to-r from-red-300 to-blue-300 h-64 w-96 rounded-lg shadow-lg flex flex-col justify-evenly items-center p-6">
             <div className="text-2xl font-bold mb-4">
-              Select Player 1 Letter
+              Select Your Letter
             </div>
             <div className="flex flex-row justify-center items-center gap-6">
               <div
