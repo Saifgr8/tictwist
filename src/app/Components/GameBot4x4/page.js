@@ -5,18 +5,11 @@ export const gameBot4x4 = (
   board,
   botSymbol,
   playerSymbol,
-  
-  botSpecialMove,
-  
+
+  botSpecialMove
 ) => {
-  
   // console.log(typeof botSpecialMove);
-  const findBestCellToOverwrite = (
-    board,
-    botSymbol,
-    humanSymbol,
-   
-  ) => {
+  const findBestCellToOverwrite = (board, botSymbol, humanSymbol) => {
     console.log("using special move");
     //winning moves
     let move = findWinRow(board, botSymbol, humanSymbol);
@@ -44,18 +37,10 @@ export const gameBot4x4 = (
     console.log(move);
     if (move) return move;
 
-    move = findLeftDiagPoints(
-      board,
-      botSymbol,
-      humanSymbol
-    );
+    move = findLeftDiagPoints(board, botSymbol, humanSymbol);
     if (move) return move;
 
-    move = findRightDiagPoints(
-      board,
-      botSymbol,
-      humanSymbol
-    );
+    move = findRightDiagPoints(board, botSymbol, humanSymbol);
     if (move) return move;
   };
 
@@ -63,6 +48,8 @@ export const gameBot4x4 = (
     for (let i = 0; i < board.length; i++) {
       // Iterate over sequences of 5 cells
       let row = board[i];
+
+      //check for 5s
       let botCount = row.filter((item) => item === symbol).length;
       let overrideIndex = -1;
       if (botCount === board.length - 1) {
@@ -76,10 +63,52 @@ export const gameBot4x4 = (
         }
       }
     }
+
+    //check for 4s
+
+    for (let i = 0; i < board.length; i++) {
+      let row = board[i];
+      for (let j = 0; j < row.length - 3; j++) {
+        if (
+          row[j] === symbol &&
+          (row[j + 1] === symbol) &
+            (row[j + 2] === "." || row[j + 2] === humanSymbol) &&
+          row[j + 3] === symbol
+        ) {
+          return { row: i, col: j + 2 };
+        }
+        if (
+          row[j] === symbol &&
+          row[j + 1] === symbol &&
+          row[j + 2] === symbol &&
+          (row[j + 3] === "." || row[j + 3] === humanSymbol)
+        ) {
+          return { row: i, col: j + 3 };
+        }
+        if (
+          row[j] === symbol &&
+          (row[j + 1] === "." || row[j + 1] === humanSymbol) &&
+          row[j + 2] === symbol &&
+          row[j + 3] === symbol
+        ) {
+          return { row: i, col: j + 1 };
+        }
+        if (
+          (row[j] === "." || row[1] === humanSymbol) &&
+          row[j + 1] === symbol &&
+          row[j + 2] === symbol &&
+          row[j + 3] === symbol
+        ) {
+          return { row: i, col: j };
+        }
+      }
+    }
+
     return null;
   };
 
   const findWinCol = (board, symbol, humanSymbol) => {
+    // Check for winning column (5s)
     for (let col = 0; col < board[0].length; col++) {
       // Extract the column for index `col`
       let column = board.map((row) => row[col]);
@@ -91,7 +120,7 @@ export const gameBot4x4 = (
         overrideIndex = column.findIndex((item) => item !== symbol);
 
         if (humanSymbol && column[overrideIndex] === humanSymbol) {
-          // Overriding humanSymbol
+          // Overriding opponent's cell
           return { row: overrideIndex, col };
         }
 
@@ -102,7 +131,48 @@ export const gameBot4x4 = (
       }
     }
 
-    return null; // No winning column found
+    // Check for 4s in columns
+    for (let col = 0; col < board[0].length; col++) {
+      let column = board.map((row) => row[col]);
+
+      // Iterate through possible 4-cell segments in the column
+      for (let i = 0; i < column.length - 3; i++) {
+        if (
+          column[i] === symbol &&
+          column[i + 1] === symbol &&
+          (column[i + 2] === "." || column[i + 2] === humanSymbol) &&
+          column[i + 3] === symbol
+        ) {
+          return { row: i + 2, col };
+        }
+        if (
+          column[i] === symbol &&
+          column[i + 1] === symbol &&
+          column[i + 2] === symbol &&
+          (column[i + 3] === "." || column[i + 3] === humanSymbol)
+        ) {
+          return { row: i + 3, col };
+        }
+        if (
+          column[i] === symbol &&
+          (column[i + 1] === "." || column[i + 1] === humanSymbol) &&
+          column[i + 2] === symbol &&
+          column[i + 3] === symbol
+        ) {
+          return { row: i + 1, col };
+        }
+        if (
+          (column[i] === "." || column[i] === humanSymbol) &&
+          column[i + 1] === symbol &&
+          column[i + 2] === symbol &&
+          column[i + 3] === symbol
+        ) {
+          return { row: i, col };
+        }
+      }
+    }
+
+    return null; // No winning or critical column found
   };
 
   const findRowPoints = (board, symbol, humanSymbol) => {
@@ -110,8 +180,6 @@ export const gameBot4x4 = (
       let row = board[i];
 
       for (let k = 0; k < row.length - 2; k++) {
-       
-
         // Empty cell at the end
         if (
           row[k] === symbol &&
@@ -119,7 +187,6 @@ export const gameBot4x4 = (
           (row[k + 2] === "." || row[k + 2] === humanSymbol) &&
           row[k] !== "."
         ) {
-          
           return { row: i, col: k + 2 };
         }
 
@@ -130,7 +197,6 @@ export const gameBot4x4 = (
           row[k + 2] === symbol &&
           row[k + 2] !== "."
         ) {
-          
           return { row: i, col: k };
         }
 
@@ -142,7 +208,6 @@ export const gameBot4x4 = (
           row[k] !== "." &&
           row[k + 2] !== "."
         ) {
-          
           return { row: i, col: k + 1 };
         }
       }
@@ -155,8 +220,6 @@ export const gameBot4x4 = (
       let col = board.map((item) => item[i]);
 
       for (let k = 0; k < col.length - 2; k++) {
-
-
         // Empty cell at the end
         if (
           col[k] === symbol &&
@@ -164,7 +227,6 @@ export const gameBot4x4 = (
           (col[k + 2] === "." || col[k + 2] === humanSymbol) &&
           col[k] !== "."
         ) {
-          
           return { row: k + 2, col: i };
         }
 
@@ -175,7 +237,6 @@ export const gameBot4x4 = (
           col[k + 2] === symbol &&
           col[k + 2] !== "."
         ) {
-         
           return { row: k, col: i };
         }
 
@@ -187,7 +248,6 @@ export const gameBot4x4 = (
           col[k] !== "." &&
           col[k + 2] !== "."
         ) {
-          
           return { row: k + 1, col: i };
         }
       }
@@ -196,14 +256,14 @@ export const gameBot4x4 = (
   };
 
   const findLeftDiagWin = (board, symbol, humanSymbol) => {
-    // Main diagonal (4 cells)
+    // Main diagonal (5 cells)
     const mainDiagonal = [];
     for (let i = 0; i < board.length; i++) {
       mainDiagonal.push(board[i][i]);
     }
 
     /** 1. Check for Winning Moves */
-    // Main diagonal: 4 consecutive symbols
+    // Main diagonal: 5 consecutive symbols
     if (
       mainDiagonal.filter((cell) => cell === symbol).length ===
         board.length - 1 &&
@@ -213,6 +273,42 @@ export const gameBot4x4 = (
         if (mainDiagonal[i] === humanSymbol || mainDiagonal[i] === ".") {
           return { row: i, col: i };
         }
+      }
+    }
+
+    //check for critiacal 4 points
+    for (let i = 0; i < mainDiagonal.length - 3; i++) {
+      if (
+        mainDiagonal[i] === symbol &&
+        mainDiagonal[i + 1] === symbol &&
+        (mainDiagonal[i + 2] === "." || mainDiagonal[i + 2] === humanSymbol) &&
+        mainDiagonal[i + 3] === symbol
+      ) {
+        return { row: i + 2, col: i + 2 };
+      }
+      if (
+        mainDiagonal[i] === symbol &&
+        mainDiagonal[i + 1] === symbol &&
+        mainDiagonal[i + 2] === symbol &&
+        (mainDiagonal[i + 3] === "." || mainDiagonal[i + 3] === humanSymbol)
+      ) {
+        return { row: i + 3, col: i + 3 };
+      }
+      if (
+        mainDiagonal[i] === symbol &&
+        (mainDiagonal[i + 1] === "." || mainDiagonal[i + 1] === humanSymbol) &&
+        mainDiagonal[i + 2] === symbol &&
+        mainDiagonal[i + 3] === symbol
+      ) {
+        return { row: i + 1, col: i + 1 };
+      }
+      if (
+        (mainDiagonal[i] === "." || mainDiagonal[i] === humanSymbol) &&
+        mainDiagonal[i + 1] === symbol &&
+        mainDiagonal[i + 2] === symbol &&
+        mainDiagonal[i + 3] === symbol
+      ) {
+        return { row: i, col: i };
       }
     }
     return null;
@@ -234,70 +330,48 @@ export const gameBot4x4 = (
         }
       }
     }
-    return null;
-  };
-
-  const findLeftDiagPoints = (
-    board,
-    symbol,
-    humanSymbol,
-  ) => {
-    const allDiag = getLeftDiags(board);
-    //console.log(allDiag);
-
-    for (let i = 0; i < allDiag.length; i++) {
-      
-      let item = allDiag[i];
-      let oneIndex1 = item[0][0];
-      let oneIndex2 = item[0][1];
-      let twoIndex1 = item[1][0];
-      let twoIndex2 = item[1][1];
-      let threeIndex1 = item[2][0];
-      let threeIndex2 = item[2][1];
+    for (let i = 0; i < mainDiag.length - 3; i++) {
       if (
-        (board[oneIndex1][oneIndex2] === "." ||
-          board[oneIndex1][oneIndex2] === humanSymbol) &&
-        board[twoIndex1][twoIndex2] === symbol &&
-        board[threeIndex1][threeIndex2] === symbol 
-        
+        mainDiag[i] === symbol &&
+        mainDiag[i + 1] === symbol &&
+        (mainDiag[i + 2] === "." || mainDiag[i + 2] === humanSymbol) &&
+        mainDiag[i + 3] === symbol
       ) {
-       
-        return { row: oneIndex1, col: oneIndex2 };
+        return { row: i + 2, col: board.length - 1 - (i + 2) };
       }
       if (
-        board[oneIndex1][oneIndex2] === symbol &&
-        (board[twoIndex1][twoIndex2] === "." ||
-          board[twoIndex1][twoIndex1] === humanSymbol) &&
-        board[threeIndex1][threeIndex2] === symbol 
+        mainDiag[i] === symbol &&
+        mainDiag[i + 1] === symbol &&
+        mainDiag[i + 2] === symbol &&
+        (mainDiag[i + 3] === "." || mainDiag[i + 3] === humanSymbol)
       ) {
-      
-        return { row: twoIndex1, col: twoIndex2 };
+        return { row: i + 3, col: board.length - 1 - (i + 3) };
       }
       if (
-        board[oneIndex1][oneIndex2] === symbol &&
-        board[twoIndex1][twoIndex2] === symbol &&
-        (board[threeIndex1][threeIndex2] === "." ||
-          board[threeIndex1][threeIndex2] === humanSymbol) 
+        mainDiag[i] === symbol &&
+        (mainDiag[i + 1] === "." || mainDiag[i + 1] === humanSymbol) &&
+        mainDiag[i + 2] === symbol &&
+        mainDiag[i + 3] === symbol
       ) {
-        
-        return { row: threeIndex1, col: threeIndex2 };
+        return { row: i + 1, col: board.length - 1 - (i + 1) };
+      }
+      if (
+        (mainDiag[i] === "." || mainDiag[i] === humanSymbol) &&
+        mainDiag[i + 1] === symbol &&
+        mainDiag[i + 2] === symbol &&
+        mainDiag[i + 3] === symbol
+      ) {
+        return { row: i, col: board.length - 1 - i };
       }
     }
     return null;
   };
 
-  const findRightDiagPoints = (
-    board,
-    symbol,
-    humanSymbol,
-    
-  ) => {
-    const allDiag = getRightDiags(board);
+  const findLeftDiagPoints = (board, symbol, humanSymbol) => {
+    const allDiag = getLeftDiags(board);
     //console.log(allDiag);
 
     for (let i = 0; i < allDiag.length; i++) {
-      
-
       let item = allDiag[i];
       let oneIndex1 = item[0][0];
       let oneIndex2 = item[0][1];
@@ -309,9 +383,8 @@ export const gameBot4x4 = (
         (board[oneIndex1][oneIndex2] === "." ||
           board[oneIndex1][oneIndex2] === humanSymbol) &&
         board[twoIndex1][twoIndex2] === symbol &&
-        board[threeIndex1][threeIndex2] === symbol 
+        board[threeIndex1][threeIndex2] === symbol
       ) {
-        
         return { row: oneIndex1, col: oneIndex2 };
       }
       if (
@@ -320,16 +393,54 @@ export const gameBot4x4 = (
           board[twoIndex1][twoIndex1] === humanSymbol) &&
         board[threeIndex1][threeIndex2] === symbol
       ) {
-      
         return { row: twoIndex1, col: twoIndex2 };
       }
       if (
         board[oneIndex1][oneIndex2] === symbol &&
         board[twoIndex1][twoIndex2] === symbol &&
         (board[threeIndex1][threeIndex2] === "." ||
-          board[threeIndex1][threeIndex2] === humanSymbol) 
+          board[threeIndex1][threeIndex2] === humanSymbol)
       ) {
-       
+        return { row: threeIndex1, col: threeIndex2 };
+      }
+    }
+    return null;
+  };
+
+  const findRightDiagPoints = (board, symbol, humanSymbol) => {
+    const allDiag = getRightDiags(board);
+    //console.log(allDiag);
+
+    for (let i = 0; i < allDiag.length; i++) {
+      let item = allDiag[i];
+      let oneIndex1 = item[0][0];
+      let oneIndex2 = item[0][1];
+      let twoIndex1 = item[1][0];
+      let twoIndex2 = item[1][1];
+      let threeIndex1 = item[2][0];
+      let threeIndex2 = item[2][1];
+      if (
+        (board[oneIndex1][oneIndex2] === "." ||
+          board[oneIndex1][oneIndex2] === humanSymbol) &&
+        board[twoIndex1][twoIndex2] === symbol &&
+        board[threeIndex1][threeIndex2] === symbol
+      ) {
+        return { row: oneIndex1, col: oneIndex2 };
+      }
+      if (
+        board[oneIndex1][oneIndex2] === symbol &&
+        (board[twoIndex1][twoIndex2] === "." ||
+          board[twoIndex1][twoIndex1] === humanSymbol) &&
+        board[threeIndex1][threeIndex2] === symbol
+      ) {
+        return { row: twoIndex1, col: twoIndex2 };
+      }
+      if (
+        board[oneIndex1][oneIndex2] === symbol &&
+        board[twoIndex1][twoIndex2] === symbol &&
+        (board[threeIndex1][threeIndex2] === "." ||
+          board[threeIndex1][threeIndex2] === humanSymbol)
+      ) {
         return { row: threeIndex1, col: threeIndex2 };
       }
     }
@@ -380,8 +491,6 @@ export const gameBot4x4 = (
   //console.log("Find blocking win rightD ", move);
   if (move) return move;
 
-  
-
   //winning points move
   move = findRowPoints(board, botSymbol);
   //console.log("Find winning row points ", move);
@@ -415,9 +524,6 @@ export const gameBot4x4 = (
   move = findRightDiagPoints(board, playerSymbol);
   //console.log("Find blocking rightD points ", move);
   if (move) return move;
-
- 
-  
 
   //random move
   let randInd = Math.floor(Math.random() * board.length);

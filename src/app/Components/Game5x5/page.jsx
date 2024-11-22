@@ -27,8 +27,9 @@ const Game5x5 = () => {
   const scoredPointsRightDiag = useRef(new Set());
   const [specialMove, setSpecialMove] = useState(false);
   const [botSpecialMove, setbotSpecialMove] = useState(false);
+  const [illegalMove, setillegalMove] = useState("");
   const [winner, setWinner] = useState("");
-  const [winnerFound, setwinnerFound] = useState(false);
+  const winnerFound = useRef(false);
   const [highlightGrid, setHighlightGrid] = useState(
     Array(grid.length)
       .fill(null)
@@ -47,53 +48,56 @@ const Game5x5 = () => {
   //console.log(typeof botSpecialMove);
 
   useEffect(() => {
-    // Update the score
-    if (!winnerFound) {
-      updateScore();
-    }
+    let localWinnerFound = winnerFound.current; // Local variable to avoid relying on async state
+    console.log("local winner is", localWinnerFound);
 
-    // Check if the game should end
-    if (winner || winnerFound) {
-      console.log("Winner found or game over. Updating state.");
+    // Early exit if a winner is already found
+    if (localWinnerFound) {
+      console.log("Winner is found, stopping game.");
       setPlayer1Points(0);
       setPlayer2Points(0);
-      return; // Exit early
+      return; // Stop further execution
     }
 
-    // Check for a draw
-    if (!grid.flat().includes(".")) {
-      console.log("It's a draw!");
-      checkDraw();
-    }
-  }, [grid]); // Trigger whenever the grid changes
+    // Update scores only if no winner is found
+    updateScore();
 
-  useEffect(() => {
-    if (winner || winnerFound) {
-      console.log("Game is over. Bot logic skipped.");
-      return; // Stop further execution if the game is over
-    }
+    const flatGrid = grid.flat();
 
+    // Check for draw condition
+
+    checkDraw();
+
+    // Handle special move
     if (specialMove) {
       console.log("Special move activated, setting player1's turn.");
       setcurrPlayer(player1);
       return;
     }
 
+    // Handle bot's special move
     if (botSpecialMove) {
-      console.log("Bot special move triggered.");
+      console.log("Bot special move triggered,", currPlayer);
       handleBotMove(player2); // Bot takes a special move
       return;
     }
 
-    if (currPlayer === player2 && player1 && grid.flat().includes(".")) {
-      console.log("Bot is making a normal move.");
+    // Handle bot's normal move
+    if (
+      currPlayer === player2 &&
+      player1 &&
+      flatGrid.includes(".") &&
+      !localWinnerFound
+    ) {
+      console.log("Bot is making a normal move. ", localWinnerFound);
       handleBotMove(player2); // Normal bot move
     }
-  }, [grid, winner, winnerFound, botSpecialMove, currPlayer]); // Dependencies include winner and winnerFound
+  }, [grid, winnerFound, botSpecialMove]);
 
   const handleReset = () => {
     router.push("/");
   };
+
   const applyHighlights = (highlights, won) => {
     console.log("Highlights to apply:", highlights);
 
@@ -111,20 +115,37 @@ const Game5x5 = () => {
     if (!won) {
       // Clear highlights after 1 second
       setTimeout(() => {
-        setHighlightGrid(
-          (prev) => prev.map((row) => row.map(() => false)) // Reset highlights
-        );
+        setHighlightGrid((prev) => prev.map((row) => row.map(() => false))); // Reset highlights
       }, 1000);
     }
-    setHighlightGrid((prev) => prev);
+  };
+
+  const HandleplayAgain = () => {
+    setHighlightGrid(
+      Array(grid.length)
+        .fill(null)
+        .map(() => Array(grid[0].length).fill(false)) // Reset highlights
+    );
+    setGrid(initilaiseGrid(grid, 5, true));
+    setPlayer1Points(0);
+    setPlayer2Points(0);
+    scoredPointsLeftDiag.current.clear();
+    scoredPointsRightDiag.current.clear();
+    scoredPositionsRow.current.clear();
+    scoredPositionsCol.current.clear();
+    setWinner("");
+    winnerFound.current = false;
+    setSpecialMove(false);
+    setbotSpecialMove(false);
+    setPlayer1(localStorage.getItem("Player1"));
+    setPlayer2(localStorage.getItem("Player2"));
+    setcurrPlayer(localStorage.getItem("CurrPlayer"));
   };
 
   const checkDraw = () => {
     let open = grid.flat().filter((item) => item === ".");
     if (open.length === 0) {
       setDraw(true);
-      window.alert("6x6 board soon!");
-      router.push("./Game5x5");
     }
   };
 
@@ -146,7 +167,7 @@ const Game5x5 = () => {
 
       // Set winner and mark the game as won
       setWinner(verdict[1]);
-      setwinnerFound(true);
+      winnerFound.current = true;
 
       // Exit the function immediately after detecting a winner
       return;
@@ -169,9 +190,8 @@ const Game5x5 = () => {
     let row = Math.floor(index / grid.length);
     let col = index % grid.length;
 
-    if (winnerFound) {
+    if (winnerFound.current) {
       window.alert("Game ended, try again");
-      router.push("/");
       return;
     }
 
@@ -191,7 +211,7 @@ const Game5x5 = () => {
       });
       return;
     }
-    if (currPlayer === player1 && !winnerFound) {
+    if (currPlayer === player1 && !winnerFound.current) {
       if (grid[row][col] === ".") {
         setGrid((prev) => {
           let newGrid = prev.map((row) => [...row]);
@@ -222,23 +242,30 @@ const Game5x5 = () => {
         });
       }
     } else {
-      console.log("Not your move");
+      let tm;
+      setillegalMove("not your move");
+      tm = setTimeout(() => {
+        setillegalMove("");
+      }, 1000);
+
+      return () => {
+        clearTimeout(tm);
+      };
     }
   };
 
   const handleBotMove = (currentPlayer) => {
-    if (currentPlayer === player2 && !winnerFound) {
+    if (currentPlayer === player2 && !winnerFound.current) {
       let bot = player2;
       let human = player1;
-      let time = botSpecialMove ? 4000 : 2000;
+      let time = botSpecialMove ? 2200 : 1500;
 
       // Local variable to track if the bot should continue
-      let botMoveCancelled = false;
 
       setTimeout(() => {
         // Re-check `winnerFound` before proceeding
-        if (winnerFound || botMoveCancelled) {
-          console.log("Bot move cancelled, winner found:", winnerFound);
+        if (winnerFound.current) {
+          console.log("Bot move cancelled, winner found:", winnerFound.current);
           return;
         }
 
@@ -256,7 +283,7 @@ const Game5x5 = () => {
           if (move) {
             setGrid((prev) => {
               // Re-check `winnerFound` during grid update
-              if (winnerFound) {
+              if (winnerFound.current) {
                 console.log("Game ended during bot special move.");
                 return prev; // Do not update grid if winner is found
               }
@@ -279,7 +306,7 @@ const Game5x5 = () => {
           console.log(move);
           setGrid((prev) => {
             // Re-check `winnerFound` during grid update
-            if (winnerFound) {
+            if (winnerFound.current) {
               console.log("Game ended during bot normal move.");
               return prev; // Do not update grid if winner is found
             }
@@ -310,11 +337,6 @@ const Game5x5 = () => {
           });
         }
       }, time);
-
-      // Cleanup mechanism if the winner changes during the timeout
-      return () => {
-        botMoveCancelled = true;
-      };
     }
   };
 
@@ -334,6 +356,8 @@ const Game5x5 = () => {
         highlightGrid={highlightGrid}
         botSpecialMove={botSpecialMove}
         draw={draw}
+        HandleplayAgain={HandleplayAgain}
+        illegalMove={illegalMove}
       />
     </div>
   );

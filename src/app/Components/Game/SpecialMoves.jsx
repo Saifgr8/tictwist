@@ -5,7 +5,7 @@ const SpecialMoves = forwardRef(({ onClose }, ref) => {
   return (
     <dialog ref={ref}>
       <div className=" w-fit flex flex-col items-center px-6 py-2 shadow-xl bg-gradient-to-r from-blue-400 to-green-300 rounded-lg  text-white text-center">
-        <h3 className="text-xl font-bold mb-2">Special Ability</h3>
+        <h3 className="text-xl font-bold mb-2">Special Ability ( 3 points )</h3>
         <p className="text-lg">
           <span className="font-semibold text-yellow-300">Power:</span> Override
           any cell on the board

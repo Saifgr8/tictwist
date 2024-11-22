@@ -27,34 +27,31 @@ const Game4x4 = () => {
   const [specialMove, setSpecialMove] = useState(false);
   const [botSpecialMove, setbotSpecialMove] = useState(false);
   const [winner, setWinner] = useState("");
-  const [winnerFound, setwinnerFound] = useState(false);
+  const [illegalMove, setillegalMove] = useState("");
+  const winnerFound = useRef(false);
   const [highlightGrid, setHighlightGrid] = useState(
     Array(grid.length)
       .fill(null)
       .map(() => Array(grid[0].length).fill(false))
   );
   const [draw, setDraw] = useState(false);
-  
+
   useEffect(() => {
     setGrid(initilaiseGrid(grid, 4));
     setPlayer1(localStorage.getItem("Player1"));
     setPlayer2(localStorage.getItem("Player2"));
-    setcurrPlayer(localStorage.getItem("CurrPlayer"))
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    setcurrPlayer(localStorage.getItem("CurrPlayer"));
   }, []);
-  console.log(currPlayer);
+
   //console.log(typeof botSpecialMove);
 
   useEffect(() => {
-    let localWinnerFound = winnerFound; // Local variable to avoid relying on async state
+    let localWinnerFound = winnerFound.current; // Local variable to avoid relying on async state
     console.log("local winner is", localWinnerFound);
 
     // Early exit if a winner is already found
-    if (localWinnerFound) {
-      console.log("Winner is found, stopping game.");
-      setPlayer1Points(0);
-      setPlayer2Points(0);
-      return; // Stop further execution
+    if (localWinnerFound && localWinnerFound === player1) {
+      startNewBoard();
     }
 
     // Update scores only if no winner is found
@@ -120,11 +117,47 @@ const Game4x4 = () => {
     }
   };
 
+  const startNewBoard = () => {
+    let winnerTimeOut;
+    winnerTimeOut = setTimeout(() => {
+      window.alert("Starting a 5x5 grid");
+      window.localStorage.setItem("Player1", player1);
+      window.localStorage.setItem("Player2", player2);
+      window.localStorage.setItem("CurrPlayer", currPlayer);
+      router.push("./Game5x5");
+    }, 1500);
+
+    return () => {
+      clearTimeout(winnerTimeOut);
+    };
+  };
+
+  const HandleplayAgain = () => {
+    setHighlightGrid(
+      (prev) => prev.map((row) => row.map(() => false)) // Reset highlights
+    );
+    setGrid(initilaiseGrid(grid, 4, true));
+    setPlayer1Points(0);
+    setPlayer2Points(0);
+    scoredPointsLeftDiag.current.clear();
+    scoredPointsRightDiag.current.clear();
+    scoredPositionsRow.current.clear();
+    scoredPositionsCol.current.clear();
+    setWinner("");
+    winnerFound.current = false;
+    setSpecialMove(false);
+    setbotSpecialMove(false);
+    setPlayer1(localStorage.getItem("Player1"));
+    setPlayer2(localStorage.getItem("Player2"));
+    setcurrPlayer(localStorage.getItem("CurrPlayer"));
+  };
+
   const checkDraw = () => {
     let open = grid.flat().filter((item) => item === ".");
+    let drawTimeOut;
     if (open.length === 0) {
       setDraw(true);
-      setTimeout(() => {
+      drawTimeOut = setTimeout(() => {
         window.alert("Starting a 5x5 grid");
         window.localStorage.setItem("Player1", player1);
         window.localStorage.setItem("Player2", player2);
@@ -132,6 +165,10 @@ const Game4x4 = () => {
         router.push("./Game5x5");
       }, 1500);
     }
+
+    return () => {
+      clearTimeout(drawTimeOut);
+    };
   };
 
   const updateScore = () => {
@@ -149,7 +186,7 @@ const Game4x4 = () => {
       let won = true;
       applyHighlights(highlight, won);
       setWinner(verdict[1]);
-      setwinnerFound(true);
+      winnerFound.current = true;
       return;
     }
 
@@ -166,11 +203,23 @@ const Game4x4 = () => {
     let row = Math.floor(index / grid.length);
     let col = index % grid.length;
 
-    if (winnerFound) {
-      window.alert("Game ended, try again");
-      router.push("/");
-      return;
+    if (currPlayer !== player1) {
+      let tm;
+      setillegalMove("Not your move");
+      tm = setTimeout(() => {
+        setillegalMove("");
+      }, 1000);
+
+      return () => {
+        clearTimeout(tm);
+      };
     }
+
+    // if (winnerFound.current) {
+    //   window.alert("Game ended, try again");
+    //   router.push("/");
+    //   return;
+    // }
 
     if (specialMove) {
       if (grid[row][col] === currPlayer) {
@@ -188,7 +237,7 @@ const Game4x4 = () => {
       });
       return;
     }
-    if (currPlayer === player1 && !winnerFound) {
+    if (currPlayer === player1 && !winnerFound.current) {
       if (grid[row][col] === ".") {
         setGrid((prev) => {
           let newGrid = prev.map((row) => [...row]);
@@ -227,19 +276,16 @@ const Game4x4 = () => {
     if (
       currentPlayer === player2 &&
       grid.flat().includes(".") &&
-      !winnerFound
+      !winnerFound.current // Access the current value
     ) {
       let bot = player2;
       let human = player1;
-      let time = botSpecialMove ? 4000 : 2000;
-
-      // Local variable to track if the bot should continue
-      let botMoveCancelled = false;
+      let time = botSpecialMove ? 2200 : 1500;
 
       setTimeout(() => {
         // Re-check `winnerFound` before proceeding
-        if (winnerFound || botMoveCancelled) {
-          console.log("Bot move cancelled, winner found:", winnerFound);
+        if (winnerFound.current) {
+          console.log("Bot move cancelled, winner found:", winnerFound.current);
           return;
         }
 
@@ -250,16 +296,15 @@ const Game4x4 = () => {
 
           if (move) {
             setGrid((prev) => {
-              // Re-check `winnerFound` during grid update
-              if (winnerFound) {
+              if (winnerFound.current) {
                 console.log("Game ended during bot special move.");
                 return prev; // Do not update grid if winner is found
               }
               let newGrid = prev.map((row) => [...row]);
               newGrid[move.row][move.col] = bot;
 
-              setbotSpecialMove(false); // End special move
-              setcurrPlayer(player1); // Pass turn to player1
+              setbotSpecialMove(false);
+              setcurrPlayer(player1);
               console.log("Special move ends.");
               return newGrid;
             });
@@ -272,8 +317,7 @@ const Game4x4 = () => {
 
         if (move) {
           setGrid((prev) => {
-            // Re-check `winnerFound` during grid update
-            if (winnerFound) {
+            if (winnerFound.current) {
               console.log("Game ended during bot normal move.");
               return prev; // Do not update grid if winner is found
             }
@@ -299,16 +343,11 @@ const Game4x4 = () => {
               }
             }
 
-            setcurrPlayer(player1); // Switch turn to player1
+            setcurrPlayer(player1);
             return newGrid;
           });
         }
       }, time);
-
-      // Cleanup mechanism if the winner changes during the timeout
-      return () => {
-        botMoveCancelled = true;
-      };
     }
   };
 
@@ -328,6 +367,8 @@ const Game4x4 = () => {
         highlightGrid={highlightGrid}
         botSpecialMove={botSpecialMove}
         draw={draw}
+        illegalMove={illegalMove}
+        HandleplayAgain={HandleplayAgain}
       />
     </div>
   );

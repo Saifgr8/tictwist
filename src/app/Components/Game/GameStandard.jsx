@@ -1,7 +1,7 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 "use client";
 import { useRouter } from "next/navigation";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { gameLogicBotMove } from "../GameBot/page";
 import GameStandardUI from "./GameStandardUI";
 import { checkBoard } from "./GameStandardRules";
@@ -17,6 +17,8 @@ const GameLogic = () => {
   const [player2, setplayer2] = useState("");
   const [currPlayer, setcurrPlayer] = useState("");
   const [winner, setWinner] = useState(null);
+  const playerWin = useRef("");
+  const [illegalMove, setillegalMove] = useState("");
   const [draw, setDraw] = useState(false);
   const [highlightGrid, setHighlightGrid] = useState(
     Array(3)
@@ -25,18 +27,28 @@ const GameLogic = () => {
   );
 
   useEffect(() => {
+    let winnerTimeOut;
     // Check for a winner or draw
     const { verdict, highlight } = checkBoard(grid);
 
     console.log(verdict, highlight);
     if (verdict[1]) {
       setWinner(verdict[1]); // Update the winner
+      playerWin.current = verdict[1];
       console.log("Winner:", verdict[1]);
       console.log("Winning Highlights:", highlight);
 
       // Apply highlights for the winning cells
       if (highlight.length > 0) {
         applyHighlights(highlight);
+      }
+      console.log(playerWin);
+      if (playerWin.current === player1) {
+        console.log("i am in");
+        winnerTimeOut = setTimeout(() => {
+          window.alert("Starting 4x4 board!");
+          router.push("/Components/Game4x4");
+        }, 1500);
       }
     } else if (!grid.flat().includes(".")) {
       checkDraw(); // Check if it's a draw
@@ -50,6 +62,11 @@ const GameLogic = () => {
       console.log("Bot's turn...");
       handleBotTurn(); // Trigger the bot's move
     }
+    return () => {
+      if (winnerTimeOut) {
+        clearTimeout(winnerTimeOut);
+      }
+    };
   }, [grid]);
 
   const handleReset = () => {
@@ -113,6 +130,10 @@ const GameLogic = () => {
 
   const handleMove = (index) => {
     if (currPlayer !== player1) {
+      setillegalMove("Not your turn");
+      setTimeout(() => {
+        setillegalMove("");
+      }, 1000);
       return;
     }
 
@@ -168,6 +189,7 @@ const GameLogic = () => {
         playAgain={playAgain}
         handleMove={handleMove}
         draw={draw}
+        illegalMove={illegalMove}
       />
     </div>
   );
